@@ -4,7 +4,7 @@
 1. [Overview](#overview)
 2. [Script Descriptions](#script-descriptions)
     * [sidmenu](#sidmenu)
-3. [Development - Guide for contributing to the module](#development)
+3. [Development - Guide for contributing](#development)
 
 # Script Descriptions
 This is a small collection of the more useful scripts i have written over the years.
