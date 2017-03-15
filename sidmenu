@@ -1,0 +1,55 @@
+#!/bin/bash
+# Written by MarketDown 10-22-2013
+# This script reads oratab entries into an array
+# then presents them in a menu format in order to set the correct
+# oracle user environment.
+# Variables to be adjusted:
+# OTAB should be set to the location of the oratab file
+# PATH and LD_LIBRARY path might need adjusted
+# to use script type ". sidmenu"
+ECHO=$(which echo)
+SED=$(which sed)
+AWK=$(which awk)
+TITLE="SID menu"
+PROMPT="Pick a SID:"
+PS3="${PROMPT} "
+# Adjust these variables to match your desired environment
+OTAB="/etc/oratab"
+PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"
+LD_LIBRARY_PATH="/usr/lib:/usr/lib64"
+
+function BuildArray()
+{
+ unset SIDLIST
+ for i in `${SED} '/^\#/d;/^$/d;/^\*/d' ${OTAB} | ${AWK} '{print $1}'`; do
+   SIDLIST=("${SIDLIST[@]}" "$i")
+ done
+}
+
+function SetSID()
+{
+ export ORACLE_SID=`${ECHO} $1 | ${AWK} -F: '{print $1}'`
+ export ORACLE_HOME=`${ECHO} $1 | ${AWK} -F: '{print $2}'`
+ export ORACLE_BASE=${ORACLE_HOME%%/product*}
+ export PATH=${PATH}:${ORACLE_HOME}/bin
+ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${ORACLE_HOME}/lib
+}
+
+function SIDMenu()
+{
+ ${ECHO} "${TITLE}"
+ select SIDNAME in "${SIDLIST[@]}" "Quit"; do
+  if [ -z "${SIDNAME}" ]; then
+      ${ECHO} "Bad Selection"
+  elif [ ${SIDNAME} = "Quit" ]; then
+      break
+  else
+      SetSID ${SIDNAME}
+      break
+  fi
+ done
+}
+
+#__Main__
+BuildArray
+SIDMenu
